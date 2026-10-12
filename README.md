@@ -1,4 +1,4 @@
-# PHIN Dial-in ([https://drive.google.com/file/d/1Ay8QxTo7vYY0t0jpf_nk3l4DjRRTTR7l/view?usp=sharing](https://www.figma.com/design/wAwisPu8mBdwfxbjY021eN/PHIN-Dial-in?node-id=1-307&t=Pj0qBKTYDaNcfAln-1))
+# PHIN Dial-in (https://www.figma.com/design/wAwisPu8mBdwfxbjY021eN/PHIN-Dial-in?node-id=1-307&t=Pj0qBKTYDaNcfAln-1)
 
 > *PHIN Dial-in automates dialing in coffee: it logs each Phin or espresso brew, tells you the one change to make next, saves the recipe that works, and warns you before your beans run out.*
 
