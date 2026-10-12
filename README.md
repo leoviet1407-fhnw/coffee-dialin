@@ -319,12 +319,10 @@ To keep it simple, both methods share one brew log, one recipe workflow and one 
 
 | Member | Main responsibility | Contributions |
 | --- | --- | --- |
-| _name_ | Coordination, README, analysis, brand/UI | |
-| _name_ | Workflows, sketches, frontend | |
-| _name_ | API contract, backend, advice rules | |
-| _name_ | Data/persistence, stock rules, tests, deployment | |
+| Pham Lac Viet Ha | Coordination, README, analysis, PHIN brand/UI, workflows, sketches, frontend | |
+| Janusz Buhler | API contract, backend, advice rules, data/persistence, stock rules, tests, deployment | |
 
-Everyone reviews the whole project. Very unequal contributions may lead to individual grading.
+Both members review the whole project. Very unequal contributions may lead to individual grading.
 
 ### Open questions
 
