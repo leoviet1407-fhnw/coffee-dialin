@@ -1,11 +1,12 @@
 """HTTP interface: routes, status codes, Location headers and error mapping. Rules live in the service."""
 from pathlib import Path
 from typing import Annotated
-from fastapi import APIRouter, Depends, FastAPI, Path as PathParameter, Request, Response
+from fastapi import APIRouter, Depends, FastAPI, Path as PathParameter, Query, Request, Response
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException
-from .models import Coffee, CoffeeInput, CoffeeUpdate, Error, Product
+from .models import (Brew, BrewInput, Coffee, CoffeeInput, CoffeeUpdate, Error, Method, Product,
+                     Recipe, RecipeInput)
 from .service import CoffeeError, CoffeeService
 from .storage import JsonStore
 
@@ -78,6 +79,35 @@ def create_app(data_file: Path) -> FastAPI:
     def delete_coffee(coffee_id: RecordId, service: Service):
         service.delete_coffee(coffee_id)
         return Response(status_code=204)
+
+    @api.get("/coffees/{coffee_id}/brews", response_model=list[Brew], tags=["Brews"],
+             operation_id="listBrews", responses=errors(404, 422))
+    def list_brews(coffee_id: RecordId, service: Service,
+                   method: Annotated[Method | None, Query(description="Only brews of this method.")] = None):
+        return service.list_brews(coffee_id, method)
+
+    @api.post("/coffees/{coffee_id}/brews", response_model=Brew, status_code=201, tags=["Brews"],
+              operation_id="logBrew", responses={**errors(404, 409, 422), 201: {"headers": LOCATION}})
+    def log_brew(coffee_id: RecordId, body: BrewInput, response: Response, service: Service):
+        brew = service.log_brew(coffee_id, body.model_dump())
+        response.headers["Location"] = f"/api/brews/{brew['id']}"
+        return brew
+
+    @api.delete("/brews/{brew_id}", status_code=204, response_class=Response, tags=["Brews"],
+                operation_id="deleteBrew", responses=errors(404, 422))
+    def delete_brew(brew_id: RecordId, service: Service):
+        service.delete_brew(brew_id)
+        return Response(status_code=204)
+
+    @api.get("/coffees/{coffee_id}/recipes", response_model=list[Recipe], tags=["Recipes"],
+             operation_id="listRecipes", responses=errors(404, 422))
+    def list_recipes(coffee_id: RecordId, service: Service):
+        return service.list_recipes(coffee_id)
+
+    @api.put("/coffees/{coffee_id}/recipes/{method}", response_model=Recipe, tags=["Recipes"],
+             operation_id="saveRecipe", responses=errors(404, 422))
+    def save_recipe(coffee_id: RecordId, method: Method, body: RecipeInput, service: Service):
+        return service.save_recipe(coffee_id, method, body.brew_id)
 
     app.include_router(api)
     return app

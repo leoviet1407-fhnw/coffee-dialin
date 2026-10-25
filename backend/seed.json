@@ -13,7 +13,7 @@
   "brews": [
     {"id": 1, "coffee_id": 1, "method": "phin", "dose_g": 18, "grind_setting": "7",
      "water_ml": 140, "water_temp_c": 94, "drip_time_s": 190, "taste": "sour",
-     "rating": 3, "notes": null, "created_at": "2026-10-20T07:30:00Z"}
+     "rating": 3, "notes": null, "grams_left": 232, "created_at": "2026-10-20T07:30:00Z"}
   ],
   "recipes": []
 }
