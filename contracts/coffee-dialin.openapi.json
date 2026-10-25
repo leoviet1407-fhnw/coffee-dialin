@@ -1,0 +1,1529 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "PHIN Dial-in API",
+    "description": "Log Phin and espresso brews, get one piece of advice per brew, save the recipe that works and track the coffee left. Milestone 2 backend.",
+    "version": "0.2.0"
+  },
+  "paths": {
+    "/api/products": {
+      "get": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "List Products",
+        "operationId": "listProducts",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Product"
+                  },
+                  "type": "array",
+                  "title": "Response Listproducts"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/coffees": {
+      "get": {
+        "tags": [
+          "Coffees"
+        ],
+        "summary": "List Coffees",
+        "operationId": "listCoffees",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Coffee"
+                  },
+                  "type": "array",
+                  "title": "Response Listcoffees"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Coffees"
+        ],
+        "summary": "Create Coffee",
+        "operationId": "createCoffee",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CoffeeInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "headers": {
+              "Location": {
+                "description": "Relative URL of the created resource",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Coffee"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/coffees/{coffee_id}": {
+      "get": {
+        "tags": [
+          "Coffees"
+        ],
+        "summary": "Read Coffee",
+        "operationId": "readCoffee",
+        "parameters": [
+          {
+            "name": "coffee_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "title": "Coffee Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Coffee"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Coffees"
+        ],
+        "summary": "Replace Coffee",
+        "operationId": "replaceCoffee",
+        "parameters": [
+          {
+            "name": "coffee_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "title": "Coffee Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CoffeeUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Coffee"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Coffees"
+        ],
+        "summary": "Delete Coffee",
+        "operationId": "deleteCoffee",
+        "parameters": [
+          {
+            "name": "coffee_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "title": "Coffee Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/coffees/{coffee_id}/brews": {
+      "get": {
+        "tags": [
+          "Brews"
+        ],
+        "summary": "List Brews",
+        "operationId": "listBrews",
+        "parameters": [
+          {
+            "name": "coffee_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "title": "Coffee Id"
+            }
+          },
+          {
+            "name": "method",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "phin",
+                    "espresso"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Only brews of this method.",
+              "title": "Method"
+            },
+            "description": "Only brews of this method."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "oneOf": [
+                      {
+                        "$ref": "#/components/schemas/PhinBrew"
+                      },
+                      {
+                        "$ref": "#/components/schemas/EspressoBrew"
+                      }
+                    ],
+                    "discriminator": {
+                      "propertyName": "method",
+                      "mapping": {
+                        "phin": "#/components/schemas/PhinBrew",
+                        "espresso": "#/components/schemas/EspressoBrew"
+                      }
+                    }
+                  },
+                  "title": "Response Listbrews"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Brews"
+        ],
+        "summary": "Log Brew",
+        "operationId": "logBrew",
+        "parameters": [
+          {
+            "name": "coffee_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "title": "Coffee Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/PhinBrewInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/EspressoBrewInput"
+                  }
+                ],
+                "discriminator": {
+                  "propertyName": "method",
+                  "mapping": {
+                    "phin": "#/components/schemas/PhinBrewInput",
+                    "espresso": "#/components/schemas/EspressoBrewInput"
+                  }
+                },
+                "title": "Body"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/PhinBrew"
+                    },
+                    {
+                      "$ref": "#/components/schemas/EspressoBrew"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "method",
+                    "mapping": {
+                      "phin": "#/components/schemas/PhinBrew",
+                      "espresso": "#/components/schemas/EspressoBrew"
+                    }
+                  },
+                  "title": "Response Logbrew"
+                }
+              }
+            },
+            "headers": {
+              "Location": {
+                "description": "Relative URL of the created resource",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict with current state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/brews/{brew_id}": {
+      "delete": {
+        "tags": [
+          "Brews"
+        ],
+        "summary": "Delete Brew",
+        "operationId": "deleteBrew",
+        "parameters": [
+          {
+            "name": "brew_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "title": "Brew Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/coffees/{coffee_id}/recipes": {
+      "get": {
+        "tags": [
+          "Recipes"
+        ],
+        "summary": "List Recipes",
+        "operationId": "listRecipes",
+        "parameters": [
+          {
+            "name": "coffee_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "title": "Coffee Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Recipe"
+                  },
+                  "title": "Response Listrecipes"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/coffees/{coffee_id}/recipes/{method}": {
+      "put": {
+        "tags": [
+          "Recipes"
+        ],
+        "summary": "Save Recipe",
+        "operationId": "saveRecipe",
+        "parameters": [
+          {
+            "name": "coffee_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "title": "Coffee Id"
+            }
+          },
+          {
+            "name": "method",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "enum": [
+                "phin",
+                "espresso"
+              ],
+              "type": "string",
+              "title": "Method"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecipeInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Recipe"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Advice": {
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "save_recipe",
+              "grind_finer",
+              "grind_coarser",
+              "hotter_water",
+              "cooler_water",
+              "longer_yield",
+              "shorter_yield"
+            ],
+            "title": "Action"
+          },
+          "time_status": {
+            "type": "string",
+            "enum": [
+              "fast",
+              "ok",
+              "slow"
+            ],
+            "title": "Time Status"
+          },
+          "ratio_status": {
+            "type": "string",
+            "enum": [
+              "low",
+              "ok",
+              "high"
+            ],
+            "title": "Ratio Status"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "action",
+          "time_status",
+          "ratio_status",
+          "message"
+        ],
+        "title": "Advice"
+      },
+      "Coffee": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "product_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Product Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "origin": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Origin"
+          },
+          "roast_level": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Roast Level"
+          },
+          "roast_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Roast Date"
+          },
+          "bag_size_g": {
+            "type": "integer",
+            "title": "Bag Size G"
+          },
+          "grams_left": {
+            "type": "number",
+            "title": "Grams Left"
+          },
+          "low_stock": {
+            "type": "boolean",
+            "title": "Low Stock",
+            "description": "True when fewer than 3 brews (at the last dose) are left."
+          },
+          "brews_left": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Brews Left"
+          },
+          "days_off_roast": {
+            "type": "integer",
+            "title": "Days Off Roast"
+          },
+          "reorder_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reorder Url",
+            "description": "Shop link, only for low-stock PHIN coffees."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "product_id",
+          "name",
+          "origin",
+          "roast_level",
+          "roast_date",
+          "bag_size_g",
+          "grams_left",
+          "low_stock",
+          "brews_left",
+          "days_off_roast",
+          "reorder_url"
+        ],
+        "title": "Coffee"
+      },
+      "CoffeeInput": {
+        "properties": {
+          "product_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Product Id",
+            "description": "PHIN product; fills missing name, origin, roast level and bag size."
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "origin": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Origin"
+          },
+          "roast_level": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Roast Level"
+          },
+          "roast_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Roast Date"
+          },
+          "bag_size_g": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 5000.0,
+                "minimum": 50.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bag Size G"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "roast_date"
+        ],
+        "title": "CoffeeInput",
+        "examples": [
+          {
+            "product_id": "saigon-drip",
+            "roast_date": "2026-10-10"
+          }
+        ]
+      },
+      "CoffeeUpdate": {
+        "properties": {
+          "product_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Product Id",
+            "description": "PHIN product; fills missing name, origin, roast level and bag size."
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "origin": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Origin"
+          },
+          "roast_level": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Roast Level"
+          },
+          "roast_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Roast Date"
+          },
+          "bag_size_g": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 5000.0,
+                "minimum": 50.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bag Size G"
+          },
+          "grams_left": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Grams Left"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "roast_date",
+          "grams_left"
+        ],
+        "title": "CoffeeUpdate",
+        "examples": [
+          {
+            "bag_size_g": 250,
+            "grams_left": 250,
+            "product_id": "saigon-drip",
+            "roast_date": "2026-10-20"
+          }
+        ]
+      },
+      "Error": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "Error"
+      },
+      "EspressoBrew": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "coffee_id": {
+            "type": "integer",
+            "title": "Coffee Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "ratio": {
+            "type": "number",
+            "title": "Ratio",
+            "description": "Water ÷ dose (Phin) or yield ÷ dose (espresso), one decimal."
+          },
+          "grams_left": {
+            "type": "number",
+            "title": "Grams Left",
+            "description": "Coffee left right after this brew."
+          },
+          "advice": {
+            "$ref": "#/components/schemas/Advice"
+          },
+          "grind_setting": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grind Setting",
+            "description": "Free text, grinder settings differ."
+          },
+          "taste": {
+            "type": "string",
+            "enum": [
+              "sour",
+              "balanced",
+              "bitter"
+            ],
+            "title": "Taste"
+          },
+          "rating": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 5.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rating"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "method": {
+            "type": "string",
+            "const": "espresso",
+            "title": "Method"
+          },
+          "dose_g": {
+            "type": "number",
+            "maximum": 30.0,
+            "minimum": 5.0,
+            "title": "Dose G"
+          },
+          "yield_g": {
+            "type": "number",
+            "maximum": 120.0,
+            "minimum": 5.0,
+            "title": "Yield G"
+          },
+          "shot_time_s": {
+            "type": "integer",
+            "maximum": 120.0,
+            "minimum": 5.0,
+            "title": "Shot Time S"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "coffee_id",
+          "created_at",
+          "ratio",
+          "grams_left",
+          "advice",
+          "taste",
+          "method",
+          "dose_g",
+          "yield_g",
+          "shot_time_s"
+        ],
+        "title": "EspressoBrew"
+      },
+      "EspressoBrewInput": {
+        "properties": {
+          "grind_setting": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grind Setting",
+            "description": "Free text, grinder settings differ."
+          },
+          "taste": {
+            "type": "string",
+            "enum": [
+              "sour",
+              "balanced",
+              "bitter"
+            ],
+            "title": "Taste"
+          },
+          "rating": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 5.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rating"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "method": {
+            "type": "string",
+            "const": "espresso",
+            "title": "Method"
+          },
+          "dose_g": {
+            "type": "number",
+            "maximum": 30.0,
+            "minimum": 5.0,
+            "title": "Dose G"
+          },
+          "yield_g": {
+            "type": "number",
+            "maximum": 120.0,
+            "minimum": 5.0,
+            "title": "Yield G"
+          },
+          "shot_time_s": {
+            "type": "integer",
+            "maximum": 120.0,
+            "minimum": 5.0,
+            "title": "Shot Time S"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "taste",
+          "method",
+          "dose_g",
+          "yield_g",
+          "shot_time_s"
+        ],
+        "title": "EspressoBrewInput",
+        "examples": [
+          {
+            "dose_g": 18,
+            "grind_setting": "2.5",
+            "method": "espresso",
+            "rating": 5,
+            "shot_time_s": 27,
+            "taste": "balanced",
+            "yield_g": 36
+          }
+        ]
+      },
+      "PhinBrew": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "coffee_id": {
+            "type": "integer",
+            "title": "Coffee Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "ratio": {
+            "type": "number",
+            "title": "Ratio",
+            "description": "Water ÷ dose (Phin) or yield ÷ dose (espresso), one decimal."
+          },
+          "grams_left": {
+            "type": "number",
+            "title": "Grams Left",
+            "description": "Coffee left right after this brew."
+          },
+          "advice": {
+            "$ref": "#/components/schemas/Advice"
+          },
+          "grind_setting": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grind Setting",
+            "description": "Free text, grinder settings differ."
+          },
+          "taste": {
+            "type": "string",
+            "enum": [
+              "sour",
+              "balanced",
+              "bitter"
+            ],
+            "title": "Taste"
+          },
+          "rating": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 5.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rating"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "method": {
+            "type": "string",
+            "const": "phin",
+            "title": "Method"
+          },
+          "dose_g": {
+            "type": "number",
+            "maximum": 25.0,
+            "minimum": 10.0,
+            "title": "Dose G"
+          },
+          "water_ml": {
+            "type": "integer",
+            "maximum": 200.0,
+            "minimum": 60.0,
+            "title": "Water Ml"
+          },
+          "water_temp_c": {
+            "type": "integer",
+            "maximum": 100.0,
+            "minimum": 85.0,
+            "title": "Water Temp C"
+          },
+          "drip_time_s": {
+            "type": "integer",
+            "maximum": 600.0,
+            "minimum": 60.0,
+            "title": "Drip Time S",
+            "description": "From the main pour to the last drop."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "coffee_id",
+          "created_at",
+          "ratio",
+          "grams_left",
+          "advice",
+          "taste",
+          "method",
+          "dose_g",
+          "water_ml",
+          "water_temp_c",
+          "drip_time_s"
+        ],
+        "title": "PhinBrew"
+      },
+      "PhinBrewInput": {
+        "properties": {
+          "grind_setting": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grind Setting",
+            "description": "Free text, grinder settings differ."
+          },
+          "taste": {
+            "type": "string",
+            "enum": [
+              "sour",
+              "balanced",
+              "bitter"
+            ],
+            "title": "Taste"
+          },
+          "rating": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 5.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rating"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "method": {
+            "type": "string",
+            "const": "phin",
+            "title": "Method"
+          },
+          "dose_g": {
+            "type": "number",
+            "maximum": 25.0,
+            "minimum": 10.0,
+            "title": "Dose G"
+          },
+          "water_ml": {
+            "type": "integer",
+            "maximum": 200.0,
+            "minimum": 60.0,
+            "title": "Water Ml"
+          },
+          "water_temp_c": {
+            "type": "integer",
+            "maximum": 100.0,
+            "minimum": 85.0,
+            "title": "Water Temp C"
+          },
+          "drip_time_s": {
+            "type": "integer",
+            "maximum": 600.0,
+            "minimum": 60.0,
+            "title": "Drip Time S",
+            "description": "From the main pour to the last drop."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "taste",
+          "method",
+          "dose_g",
+          "water_ml",
+          "water_temp_c",
+          "drip_time_s"
+        ],
+        "title": "PhinBrewInput",
+        "examples": [
+          {
+            "dose_g": 18,
+            "drip_time_s": 190,
+            "grind_setting": "7",
+            "method": "phin",
+            "taste": "sour",
+            "water_ml": 140,
+            "water_temp_c": 94
+          }
+        ]
+      },
+      "Product": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "origin": {
+            "type": "string",
+            "title": "Origin"
+          },
+          "roast_level": {
+            "type": "string",
+            "title": "Roast Level"
+          },
+          "bag_size_g": {
+            "type": "integer",
+            "title": "Bag Size G"
+          },
+          "shop_url": {
+            "type": "string",
+            "title": "Shop Url"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "origin",
+          "roast_level",
+          "bag_size_g",
+          "shop_url"
+        ],
+        "title": "Product"
+      },
+      "Recipe": {
+        "properties": {
+          "coffee_id": {
+            "type": "integer",
+            "title": "Coffee Id"
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "phin",
+              "espresso"
+            ],
+            "title": "Method"
+          },
+          "brew_id": {
+            "type": "integer",
+            "title": "Brew Id"
+          },
+          "brew": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PhinBrew"
+              },
+              {
+                "$ref": "#/components/schemas/EspressoBrew"
+              }
+            ],
+            "title": "Brew",
+            "discriminator": {
+              "propertyName": "method",
+              "mapping": {
+                "espresso": "#/components/schemas/EspressoBrew",
+                "phin": "#/components/schemas/PhinBrew"
+              }
+            }
+          }
+        },
+        "type": "object",
+        "required": [
+          "coffee_id",
+          "method",
+          "brew_id",
+          "brew"
+        ],
+        "title": "Recipe"
+      },
+      "RecipeInput": {
+        "properties": {
+          "brew_id": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Brew Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "brew_id"
+        ],
+        "title": "RecipeInput",
+        "examples": [
+          {
+            "brew_id": 2
+          }
+        ]
+      }
+    }
+  }
+}
