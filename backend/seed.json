@@ -1,0 +1,19 @@
+{
+  "next_coffee_id": 2,
+  "next_brew_id": 2,
+  "products": [
+    {"id": "hanoi-haze", "name": "Hanoi Haze", "origin": "Vietnam", "roast_level": "medium", "bag_size_g": 250, "shop_url": "https://phinkafi.ch"},
+    {"id": "da-lat-dawn", "name": "Da Lat Dawn", "origin": "Vietnam", "roast_level": "medium-dark", "bag_size_g": 250, "shop_url": "https://phinkafi.ch"},
+    {"id": "saigon-drip", "name": "Saigon Drip", "origin": "Vietnam", "roast_level": "dark", "bag_size_g": 250, "shop_url": "https://phinkafi.ch"}
+  ],
+  "coffees": [
+    {"id": 1, "product_id": "saigon-drip", "name": "Saigon Drip", "origin": "Vietnam",
+     "roast_level": "dark", "roast_date": "2026-10-10", "bag_size_g": 250, "grams_left": 232}
+  ],
+  "brews": [
+    {"id": 1, "coffee_id": 1, "method": "phin", "dose_g": 18, "grind_setting": "7",
+     "water_ml": 140, "water_temp_c": 94, "drip_time_s": 190, "taste": "sour",
+     "rating": 3, "notes": null, "created_at": "2026-10-20T07:30:00Z"}
+  ],
+  "recipes": []
+}
