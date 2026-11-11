@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+
+# Local database (recreated with demo data on start)
+data/
+
+# Editors / OS
+.DS_Store
+.vscode/
+.idea/
