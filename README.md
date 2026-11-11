@@ -5,7 +5,7 @@
 A web application branded for **PHIN Kafi** (Vietnamese coffee from Switzerland, [phinkafi.ch](https://phinkafi.ch), a team member's own brand), built around its coffees and two brew methods: the traditional **Phin filter** and the **espresso machine**.
 
 > Web-based Applications · FHNW · HS26 · group project
-> **Status: planning.** This README is the project plan. Implementation starts once the group has agreed on it.
+> **Status: first working version** (backend, SQLite database, frontend, tests). User accounts and Docker follow the course schedule. How the code works: [docs/EXPLAINED.md](docs/EXPLAINED.md).
 
 ---
 
@@ -257,27 +257,60 @@ Location: /api/brews/12
 
 ---
 
-## 3. Planned implementation
+## 3. Implementation
 
-Three logical **layers** in one server **tier**, following the course's Station Bar example:
+Three logical **layers** in one server **tier**, following the course's Station Bar example. Full walkthrough, including the database design: **[docs/EXPLAINED.md](docs/EXPLAINED.md)**.
 
 ```
 Browser (frontend/: HTML, CSS, JS, PHIN styling)  ──HTTP + JSON──▶  Uvicorn + FastAPI
                                                                     ├─ api.py       routes, status codes
+                                                                    ├─ schemas.py   Pydantic input/output (R1)
                                                                     ├─ service.py   business rules R2, R5–R8
-                                                                    │  └─ advice.py    advice R3–R4 (pure functions)
-                                                                    ├─ models.py    Pydantic schemas (R1)
-                                                                    └─ storage.py   JsonStore: seed.json → data.json
+                                                                    │  └─ advice.py    brewing rules R3–R4 (pure functions)
+                                                                    ├─ models.py    tables (SQLAlchemy ORM)
+                                                                    └─ db.py        SQLite connection → data/dialin.db
 ```
 
 | Part | Choice | Reason |
 | --- | --- | --- |
-| Backend | Python, FastAPI, Pydantic, Uvicorn | Used in class; validation and OpenAPI come from the models. |
-| Storage | JSON file, optional ORM (SQLAlchemy / SQLModel) | Matches the persistence class (19 Oct). |
-| Frontend | Plain HTML, CSS, JavaScript, served by the same app | Matches the frontend class (9 Nov); no build step. |
-| Tests | pytest + FastAPI `TestClient`; Postman collection | Every status code in the API table has a test. |
+| Backend | Python, FastAPI, Pydantic, Uvicorn | Used in class; validation and OpenAPI come from the schemas. |
+| Database | **SQLite** via **SQLAlchemy 2 (ORM)** | Real tables, foreign keys, constraints and transactions in one file; no server; switch to PostgreSQL with one setting. |
+| Frontend | Plain HTML, CSS, JavaScript, served by the same app | Matches the frontend class (9 Nov); no build step, no CORS. |
+| Tests | pytest + FastAPI `TestClient` (fresh SQLite file per test) | Every rule and status code has a test. |
 | Environment | GitHub Codespaces (`.devcontainer`) | Course setup; reproducible for the graders. |
-| Later | User accounts (23 Nov), Dockerfile (30 Nov) | Follows the course schedule. |
+| Later | User accounts (23 Nov), Dockerfile (30 Nov), Alembic migrations | Follows the course schedule. |
+
+### Database tables
+
+```
+products 1 ──< coffees 1 ──< brews
+                  1
+                  └──< recipes >── 1 brews      UNIQUE (coffee_id, method)
+```
+
+Deleting a coffee removes its brews and recipes (`ON DELETE CASCADE`); stock can never go negative (`CHECK grams_left >= 0`); every change runs in one transaction.
+
+### Run it
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
+pip install -r requirements-test.txt
+uvicorn dialin_api.main:app --reload
+```
+
+- App: <http://localhost:8000> · interactive API docs: <http://localhost:8000/docs>
+- In Codespaces: dependencies install automatically; run `uvicorn dialin_api.main:app --reload --host 0.0.0.0` and open port 8000 (keep it private).
+- The database file `data/dialin.db` is created on first start with the PHIN range and two demo coffees. Delete it to start fresh; set `DIALIN_DEMO_DATA=0` to start without demo coffees.
+- Look inside: `sqlite3 data/dialin.db` then `.tables` / `SELECT * FROM coffees;`.
+
+### Test
+
+```bash
+pytest
+```
+
+After changing routes or schemas, update the contract with `python scripts/export_openapi.py` (a test fails if it is out of date).
 
 ---
 
@@ -289,7 +322,7 @@ Browser (frontend/: HTML, CSS, JS, PHIN styling)  ──HTTP + JSON──▶  Uv
 | --- | --- | --- |
 | Problem, value and scope | 15% | A real process (dialing in) with clear users, value and explicit scope. |
 | Functionality and business rules | 25% | Full CRUD on coffees, brews with advice, recipe rules, stock rules (R6–R8). Validation (422) and state conflicts (409) are kept apart, as taught. |
-| Architecture, API and data | 20% | Layered FastAPI backend, OpenAPI contract, related data (product → coffee → brews/recipes), JSON storage. |
+| Architecture, API and data | 20% | Layered FastAPI backend, OpenAPI contract, related data (product → coffee → brews/recipes) in SQLite with an ORM, foreign keys and transactions. |
 | Testing and security | 15% | Tests for every success and failure case; user accounts in the security week. |
 | Usability | 10% | Prefilled forms, one clear suggestion, inline errors, responsive layout, PHIN branding. |
 | Documentation, reproducibility, collaboration | 15% | This README, Codespaces setup, seed data, contribution table, commits from every member. |
@@ -313,7 +346,7 @@ To keep it simple, both methods share one brew log, one recipe workflow and one 
 
 - **QR code on PHIN bags** linking to `…/#/add?product=saigon-drip`: the phone's own camera opens it, so the app needs no scanning code.
 - Advice that also compares with the previous brew.
-- Moving storage to an ORM.
+- Alembic migrations, so the database can change without deleting it.
 
 ### Team and responsibilities
 
@@ -332,11 +365,13 @@ Both members review the whole project. Very unequal contributions may lead to in
 
 ### Use of AI assistance
 
-We drafted parts of this plan with an AI assistant (Claude). The group reviews every part and must be able to explain it.
+We drafted parts of this plan and the first version of the code with an AI assistant (Claude). The group reviews every part and must be able to explain it; [docs/EXPLAINED.md](docs/EXPLAINED.md) is our walkthrough.
 
 ## References
 
 - Course material *Web-based Applications HS26*, FHNW (D. Montecchiari): teaching model, networks and APIs, app design, API design and lifecycle, API contracts and backend development.
 - PHIN Kafi: brand, coffees and Phin brew guide, <https://phinkafi.ch>
 - FastAPI documentation: <https://fastapi.tiangolo.com/>
+- SQLAlchemy 2 ORM documentation: <https://docs.sqlalchemy.org/>
+- SQLite: <https://www.sqlite.org/>
 - OpenAPI Specification 3.1: <https://spec.openapis.org/oas/latest.html>
