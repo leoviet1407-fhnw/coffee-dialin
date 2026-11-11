@@ -352,7 +352,7 @@ To keep it simple, both methods share one brew log, one recipe workflow and one 
 
 | Member | Main responsibility | Contributions |
 | --- | --- | --- |
-| Pham Lac Viet Ha | Coordination, README, analysis, PHIN brand/UI, workflows, sketches, frontend | |
+| Pham Lac Viet Ha | Coordination, README, analysis, PHIN brand/UI, workflows, sketches, frontend | plan, design, Figma, frontend, first version of the code with AI help |
 | Janusz Buhler | API contract, backend, advice rules, data/persistence, stock rules, tests, deployment | |
 
 Both members review the whole project. Very unequal contributions may lead to individual grading.
