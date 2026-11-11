@@ -5,7 +5,7 @@
 A web application branded for **PHIN Kafi** (Vietnamese coffee from Switzerland, [phinkafi.ch](https://phinkafi.ch), a team member's own brand), built around its coffees and two brew methods: the traditional **Phin filter** and the **espresso machine**.
 
 > Web-based Applications · FHNW · HS26 · group project
-> **Status: first working version** (backend, SQLite database, frontend, tests). User accounts and Docker follow the course schedule. How the code works: [docs/EXPLAINED.md](docs/EXPLAINED.md).
+> **Status: first working version** (backend, SQLite database, frontend, tests). User accounts and Docker follow the course schedule. How the code works: [docs/EXPLAINED.md](docs/EXPLAINED.md). 
 
 ---
 
