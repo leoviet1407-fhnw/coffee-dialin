@@ -7,7 +7,6 @@ venv/
 
 # Local data (recreated on start)
 data/
-backend/data.json
 *.tmp
 
 # Editors / OS
