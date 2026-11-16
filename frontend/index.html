@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PHIN Dial-in</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anonymous+Pro:wght@400;700&family=Figtree:wght@500;700&display=swap">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="#/">PHIN <span>Dial-in</span></a>
+    <nav><a href="#/">Coffees</a></nav>
+  </header>
+
+  <main id="app" aria-live="polite"></main>
+
+  <!-- Page 1: coffee list -->
+  <template id="tpl-list">
+    <h1>Your coffees</h1>
+    <p class="lead">Pick a coffee to log a brew, or add the bag you just opened.</p>
+    <ul class="cards" id="coffee-list"></ul>
+    <p class="empty" id="coffee-empty" hidden>No coffees yet. Add the bag you just opened.</p>
+
+    <section class="panel">
+      <h2>Add a coffee</h2>
+      <form id="coffee-form" novalidate>
+        <div class="grid">
+          <label>PHIN coffee
+            <select name="product_id" id="product-select"></select>
+          </label>
+          <label>Bag size (g) <input name="bag_size_g" type="number" min="50" max="5000" step="1"></label>
+          <label>Roast date <input name="roast_date" type="date" required>
+            <span class="hint">not in the future</span></label>
+        </div>
+        <div class="grid" id="other-fields" hidden>
+          <label>Name <input name="name" maxlength="80"></label>
+          <label>Origin <input name="origin" maxlength="80"></label>
+          <label>Roast level
+            <select name="roast_level">
+              <option value="light">Light</option>
+              <option value="medium" selected>Medium</option>
+              <option value="dark">Dark</option>
+            </select>
+          </label>
+        </div>
+        <p class="form-error" role="alert" hidden></p>
+        <button type="submit">Add coffee</button>
+      </form>
+    </section>
+  </template>
+
+  <!-- Page 2: coffee detail -->
+  <template id="tpl-detail">
+    <p><a href="#/">← All coffees</a></p>
+    <h1 id="coffee-name"></h1>
+    <p class="lead" id="coffee-meta"></p>
+
+    <section class="stock" id="stock">
+      <p id="stock-text"></p>
+      <button type="button" class="secondary" id="new-bag-btn">New bag</button>
+    </section>
+    <p class="warning" id="low-stock" role="status" hidden></p>
+
+    <div class="tabs" role="tablist">
+      <button type="button" role="tab" data-method="phin">Phin filter</button>
+      <button type="button" role="tab" data-method="espresso">Espresso</button>
+    </div>
+
+    <section class="recipe" id="recipe"></section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Log a brew</h2>
+        <p class="hint" id="targets"></p>
+      </div>
+      <form id="brew-form" novalidate>
+        <div class="grid" id="method-fields"></div>
+        <div class="grid">
+          <fieldset>
+            <legend>Taste</legend>
+            <label class="inline"><input type="radio" name="taste" value="sour"> Sour</label>
+            <label class="inline"><input type="radio" name="taste" value="balanced"> Balanced</label>
+            <label class="inline"><input type="radio" name="taste" value="bitter"> Bitter</label>
+          </fieldset>
+          <label>Rating <span class="hint">optional, 1–5</span>
+            <input name="rating" type="number" min="1" max="5" step="1"></label>
+          <label class="wide">Notes <span class="hint">optional</span>
+            <input name="notes" maxlength="500"></label>
+        </div>
+        <p class="form-error" role="alert" hidden></p>
+        <button type="submit">Log brew</button>
+      </form>
+    </section>
+
+    <section class="advice" id="advice" hidden>
+      <h2>Next brew</h2>
+      <p id="advice-text"></p>
+    </section>
+
+    <section>
+      <h2>Brew log</h2>
+      <p class="empty" id="log-empty" hidden></p>
+      <div class="table-wrap"><table id="log" hidden><thead></thead><tbody></tbody></table></div>
+    </section>
+
+    <dialog id="bag-dialog">
+      <form method="dialog" id="bag-form" novalidate>
+        <h2>Add a new bag</h2>
+        <div class="grid">
+          <label>Bag size (g) <input name="bag_size_g" type="number" min="50" max="5000" required></label>
+          <label>Roast date <input name="roast_date" type="date" required></label>
+        </div>
+        <p id="bag-sum"></p>
+        <p class="form-error" role="alert" hidden></p>
+        <div class="actions">
+          <button type="submit" value="add">Add bag</button>
+          <button type="button" class="secondary" id="bag-cancel">Cancel</button>
+        </div>
+      </form>
+    </dialog>
+  </template>
+
+  <script src="app.js"></script>
+</body>
+</html>

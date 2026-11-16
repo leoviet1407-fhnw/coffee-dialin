@@ -1,9 +1,17 @@
-.venv/
-venv/
+# Python
 __pycache__/
 *.py[cod]
+.venv/
+venv/
 .pytest_cache/
+
+# Local data (recreated on start)
+data/
 backend/data.json
 *.tmp
+
+# Editors / OS
 .DS_Store
 Thumbs.db
+.vscode/
+.idea/
