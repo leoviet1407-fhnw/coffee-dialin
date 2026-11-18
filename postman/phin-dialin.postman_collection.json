@@ -1,0 +1,772 @@
+{
+  "info": {
+    "name": "PHIN Dial-in API",
+    "description": "Every operation of the PHIN Dial-in API with a success and an error case. Start the app (uvicorn dialin_api.main:app --reload), then Run collection: requests are ordered and pass IDs to each other. It creates its own test coffees and deletes them at the end.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "const d = new Date();",
+          "pm.collectionVariables.set('today', d.toISOString().slice(0, 10));",
+          "pm.collectionVariables.set('nextYear', `${d.getFullYear() + 1}-01-01`);"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000/api"
+    }
+  ],
+  "item": [
+    {
+      "name": "1 · Products",
+      "item": [
+        {
+          "name": "List the PHIN range",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('three PHIN coffees', () => pm.expect(pm.response.json()).to.have.length(3));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/products",
+            "description": ""
+          }
+        }
+      ]
+    },
+    {
+      "name": "2 · Coffees",
+      "item": [
+        {
+          "name": "Add Saigon Drip (PHIN prefill)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Location header', () => pm.response.to.have.header('Location'));",
+                  "pm.test('prefilled from PHIN', () => pm.expect(pm.response.json().grams_left).to.eql(250));",
+                  "pm.collectionVariables.set('coffee_id', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/coffees",
+            "description": "Name, origin, roast level and bag size come from the PHIN product.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"product_id\": \"saigon-drip\",\n  \"roast_date\": \"{{today}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Roast date in the future (422)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 422', () => pm.response.to.have.status(422));",
+                  "pm.test('explains the rule', () => pm.expect(pm.response.json().detail).to.include('future'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/coffees",
+            "description": "Business rule R2.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"product_id\": \"saigon-drip\",\n  \"roast_date\": \"{{nextYear}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Other coffee without details (422)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 422', () => pm.response.to.have.status(422));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/coffees",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Kenya AA\",\n  \"roast_date\": \"{{today}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "List coffees",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/coffees",
+            "description": ""
+          }
+        },
+        {
+          "name": "Read the new coffee",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/coffees/{{coffee_id}}",
+            "description": ""
+          }
+        },
+        {
+          "name": "Coffee that does not exist (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 404', () => pm.response.to.have.status(404));",
+                  "pm.test('message', () => pm.expect(pm.response.json().detail).to.eql('Coffee 999999 was not found.'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/coffees/999999",
+            "description": ""
+          }
+        },
+        {
+          "name": "New bag: PUT more grams",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('stock updated', () => pm.expect(pm.response.json().grams_left).to.eql(500));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/coffees/{{coffee_id}}",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Saigon Drip\",\n  \"origin\": \"100% Vietnamese Robusta\",\n  \"roast_level\": \"dark\",\n  \"roast_date\": \"{{today}}\",\n  \"bag_size_g\": 250,\n  \"grams_left\": 500\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3 · Brews",
+      "item": [
+        {
+          "name": "Log a sour, fast Phin brew",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', () => pm.response.to.have.status(201));",
+                  "pm.test('advice: grind finer', () => pm.expect(pm.response.json().advice.action).to.eql('grind_finer'));",
+                  "pm.test('dose subtracted', () => pm.expect(pm.response.json().grams_left).to.eql(482));",
+                  "pm.collectionVariables.set('sour_brew_id', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/coffees/{{coffee_id}}/brews",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"method\": \"phin\",\n  \"dose_g\": 18,\n  \"water_ml\": 140,\n  \"water_temp_c\": 94,\n  \"drip_time_s\": 190,\n  \"grind_setting\": \"7\",\n  \"taste\": \"sour\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Log a balanced Phin brew",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', () => pm.response.to.have.status(201));",
+                  "pm.test('advice: keep', () => pm.expect(pm.response.json().advice.action).to.eql('keep'));",
+                  "pm.collectionVariables.set('balanced_brew_id', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/coffees/{{coffee_id}}/brews",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"method\": \"phin\",\n  \"dose_g\": 18,\n  \"water_ml\": 130,\n  \"water_temp_c\": 93,\n  \"drip_time_s\": 290,\n  \"grind_setting\": \"6\",\n  \"taste\": \"balanced\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Log a balanced espresso shot",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', () => pm.response.to.have.status(201));",
+                  "pm.test('ratio 1:2', () => pm.expect(pm.response.json().ratio).to.eql(2));",
+                  "pm.collectionVariables.set('shot_id', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/coffees/{{coffee_id}}/brews",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"method\": \"espresso\",\n  \"dose_g\": 18,\n  \"yield_g\": 36,\n  \"shot_time_s\": 28,\n  \"grind_setting\": \"2.4\",\n  \"taste\": \"balanced\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Water too hot (422)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 422', () => pm.response.to.have.status(422));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/coffees/{{coffee_id}}/brews",
+            "description": "Rule R1: Phin water 85–100 °C.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"method\": \"phin\",\n  \"dose_g\": 18,\n  \"water_ml\": 140,\n  \"water_temp_c\": 110,\n  \"drip_time_s\": 190,\n  \"grind_setting\": \"7\",\n  \"taste\": \"sour\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Missing taste (422)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 422', () => pm.response.to.have.status(422));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/coffees/{{coffee_id}}/brews",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"method\": \"phin\",\n  \"dose_g\": 18,\n  \"water_ml\": 140,\n  \"water_temp_c\": 94,\n  \"drip_time_s\": 190,\n  \"grind_setting\": \"7\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Brew log, Phin only",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('only Phin', () => pm.response.json().forEach(b => pm.expect(b.method).to.eql('phin')));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/coffees/{{coffee_id}}/brews?method=phin",
+            "description": ""
+          }
+        },
+        {
+          "name": "Read one brew",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/brews/{{sour_brew_id}}",
+            "description": ""
+          }
+        }
+      ]
+    },
+    {
+      "name": "4 · Recipes",
+      "item": [
+        {
+          "name": "Sour brew as recipe (422)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 422', () => pm.response.to.have.status(422));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/coffees/{{coffee_id}}/recipes/phin",
+            "description": "Rule R5: only a balanced brew.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"brew_id\": {{sour_brew_id}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Save the balanced Phin brew",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/coffees/{{coffee_id}}/recipes/phin",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"brew_id\": {{balanced_brew_id}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Phin brew as espresso recipe (422)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 422', () => pm.response.to.have.status(422));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/coffees/{{coffee_id}}/recipes/espresso",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"brew_id\": {{balanced_brew_id}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "List recipes",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/coffees/{{coffee_id}}/recipes",
+            "description": ""
+          }
+        }
+      ]
+    },
+    {
+      "name": "5 · Stock",
+      "item": [
+        {
+          "name": "Add a nearly empty bag",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', () => pm.response.to.have.status(201));",
+                  "pm.test('low stock flag', () => pm.expect(pm.response.json().low_stock).to.be.true);",
+                  "pm.collectionVariables.set('low_coffee_id', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/coffees",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"product_id\": \"da-lat-dawn\",\n  \"roast_date\": \"{{today}}\",\n  \"grams_left\": 6\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Brew more than is left (409)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 409', () => pm.response.to.have.status(409));",
+                  "pm.test('message', () => pm.expect(pm.response.json().detail).to.eql('Only 6 g left. Add a new bag first.'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/coffees/{{low_coffee_id}}/brews",
+            "description": "Rule R6: nothing is saved, stock stays at 6 g.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"method\": \"phin\",\n  \"dose_g\": 18,\n  \"water_ml\": 140,\n  \"water_temp_c\": 94,\n  \"drip_time_s\": 190,\n  \"grind_setting\": \"7\",\n  \"taste\": \"sour\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Delete a brew: dose comes back",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/brews/{{sour_brew_id}}",
+            "description": ""
+          }
+        }
+      ]
+    },
+    {
+      "name": "6 · Clean up",
+      "item": [
+        {
+          "name": "Delete the nearly empty coffee",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/coffees/{{low_coffee_id}}",
+            "description": ""
+          }
+        },
+        {
+          "name": "Delete Saigon Drip with its brews",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/coffees/{{coffee_id}}",
+            "description": ""
+          }
+        },
+        {
+          "name": "Its brews are gone too (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/brews/{{balanced_brew_id}}",
+            "description": "Rule R8: ON DELETE CASCADE."
+          }
+        }
+      ]
+    }
+  ]
+}
