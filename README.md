@@ -312,6 +312,8 @@ pytest
 
 After changing routes or schemas, update the contract with `python scripts/export_openapi.py` (a test fails if it is out of date).
 
+**Postman:** import [`postman/phin-dialin.postman_collection.json`](postman/phin-dialin.postman_collection.json), start the app, then *Run collection*. Its 25 requests cover every operation with a success and an error case (404, 409, 422), pass IDs to each other, check the status codes and messages, and delete their own test data at the end. `baseUrl` is `http://localhost:8000/api`; change it for Codespaces.
+
 ---
 
 ## 4. Plan
@@ -347,6 +349,22 @@ To keep it simple, both methods share one brew log, one recipe workflow and one 
 - **QR code on PHIN bags** linking to `…/#/add?product=saigon-drip`: the phone's own camera opens it, so the app needs no scanning code.
 - Advice that also compares with the previous brew.
 - Alembic migrations, so the database can change without deleting it.
+
+### Decisions
+
+| Date | Decision | Why |
+| --- | --- | --- |
+| 12 Oct | Phin filter **and** espresso in the first version | PHIN sells Phin filters; many customers also brew espresso. |
+| 12 Oct | Simple stock (grams left per coffee) instead of barcode scanning | Keeps the business rules (409, low stock) without camera code; QR code stays optional. |
+| 12 Oct | Pick a PHIN coffee from a list to prefill "Add a coffee" | Same convenience as a scan, no extra technology. |
+| 12 Oct | No brew editing; a new recipe replaces the old one | Fewer screens and rules; delete and log again instead. |
+| 12 Oct | Espresso target 25–30 s at 1:2, Phin 4–6 min at about 1:7 | Standard barista guidance and PHIN's own brew guide. |
+| 11 Nov | SQLite with SQLAlchemy ORM instead of the JSON file prototype | Foreign keys, cascades, constraints and transactions; still one file, no server. |
+| 11 Nov | One `brews` table for both methods | One brew log and one query; method-only columns are empty for the other method. |
+| 11 Nov | Ratio, advice and low stock are computed, never stored | They cannot disagree with the stored numbers. |
+| 11 Nov | Plain HTML, CSS and JavaScript served by FastAPI | As taught in the course; no build step and no CORS. |
+| 11 Nov | API contract generated from the code and checked by a test | The contract and the running API cannot drift apart. |
+| 16 Nov | Remove the JSON prototype backend; `dialin_api` is the only backend | One code base to test, document and present. |
 
 ### Team and responsibilities
 
